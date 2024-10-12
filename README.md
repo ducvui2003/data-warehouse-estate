@@ -30,12 +30,13 @@ Make sure you have the following installed:
 - Chrome Browser
 
 ## Setup
-### 1. Install environment
+### 1. Install environment (in root project)
 ```bash
    python3 -m venv .venv
+   pip install -r requirements.txt
 ```
 
 ### 3. Run the project (in root project)
-```bash
-  python3 -m  src.main
+```bash (extract_service)
+   python3 -m service.extract_service.main
 ```

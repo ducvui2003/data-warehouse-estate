@@ -7,7 +7,7 @@ from service.crawler.src.util.file_handler import write_json_to_csv
 
 def run_crawlers():
     # Initialize Source1Crawler
-    source1_crawler = Source1Crawler(driver_path=DRIVER_PATH)
+    source1_crawler = Source1Crawler()
     source1_crawler.setup_driver(headless=True)  # Headless browser option
     # source1_crawler.setJwt()
     data = source1_crawler.crawl()

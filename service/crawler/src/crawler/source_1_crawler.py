@@ -4,8 +4,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from selenium.webdriver.common.by import By
 
-from src.config.setting import SOURCE_A_URL
-from src.crawler.base_crawler import BaseCrawler
+from service.crawler.src.config.setting import SOURCE_A_URL
+from service.crawler.src.crawler.base_crawler import BaseCrawler
 
 
 class Source1Crawler(BaseCrawler):

@@ -18,4 +18,4 @@ elif os_name == "Linux":
     DRIVER_PATH = os.path.join(ROOT_DIR, "driver/chromedriver-linux64/chromedriver")
 U_BLOCK = os.path.join(ROOT_DIR, "driver/chromedriver-linux64/uBlock.crx")
 
-FOLDER_DATA = os.path.join(ROOT_DIR.parent, "data")
+FOLDER_DATA = os.path.join(ROOT_DIR.parent.parent, "data")

@@ -1,8 +1,7 @@
 from datetime import datetime
 
-from service.crawler.src.config.setting import DRIVER_PATH
-from service.crawler.src.crawler.source_1_crawler import Source1Crawler
-from service.crawler.src.util.file_handler import write_json_to_csv
+from service.extract_service.src.crawler.source_1_crawler import Source1Crawler
+from service.extract_service.src.util.file_handler import write_json_to_csv
 
 
 def run_crawlers():

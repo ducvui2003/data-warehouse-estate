@@ -3,8 +3,8 @@ import os
 import json
 import csv
 
-from service.crawler.src.config.setting import FOLDER_DATA
-from service.crawler.src.util.flat_data import flatten_json
+from service.extract_service.src.config.setting import FOLDER_DATA
+from service.extract_service.src.util.flat_data import flatten_json
 
 
 def write_to_csv(filename, data):

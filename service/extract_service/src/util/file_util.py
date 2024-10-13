@@ -1,10 +1,9 @@
-import pandas as pd
-import os
 import json
-import csv
+import os
+
+import pandas as pd
 
 from service.extract_service.src.config.setting import FOLDER_DATA
-from service.extract_service.src.util.data_util import flatten_json
 
 
 def write_to_csv(filename, data):
@@ -44,12 +43,18 @@ def read_file_to_json(file_name):
 
 
 def write_json_to_csv(file_name, json_list):
-    flattened_data = [flatten_json(data) for data in json_list]
+    """
+        Flatten a list of JSON objects and write it to a CSV file.
 
-    # Convert the flat JSON to a DataFrame
-    df = pd.DataFrame(flattened_data)  # Convert to DataFrame
+        :param file_name: The name of the CSV file.
+        :param json_list: A list of JSON objects to be flattened and saved to CSV.
+        """
+    # Flatten the list of JSON objects
+    df = pd.json_normalize(json_list)
+
     # Create the directory if it does not exist
     os.makedirs(FOLDER_DATA, exist_ok=True)
     location = os.path.join(FOLDER_DATA, file_name)
+
     # Save the DataFrame to a CSV file
-    df.to_csv(location, index=False, )
+    df.to_csv(location, index=False, encoding='utf-8')

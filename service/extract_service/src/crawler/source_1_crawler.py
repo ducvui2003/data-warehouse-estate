@@ -11,18 +11,6 @@ from service.extract_service.src.crawler.base_crawler import BaseCrawler
 class Source1Crawler(BaseCrawler):
     _base_url = "https://batdongsan.com.vn"
 
-    def setJwt(self):
-        self.driver.get("https://batdongsan.com.vn/sellernet/trang-dang-nhap")
-        WebDriverWait(self.driver, 20).until(lambda d: d.execute_script("return document.readyState") == "complete")
-        username_input = self.driver.find_element(By.CSS_SELECTOR, "input[name='username']")
-        password_input = self.driver.find_element(By.CSS_SELECTOR, "input[name='password']")
-        # username_input.send_keys(USERNAME)
-        # password_input.send_keys(PASSWORD)
-        login_btn = self.driver.find_element(By.ID, "signin-button")
-        login_btn.click()
-        print("Logged in")
-        self.wait(5)
-
     def crawl(self):
         self.get_url(SOURCE_A_URL)
 
@@ -56,11 +44,6 @@ class Source1Crawler(BaseCrawler):
         self.get_url(url)
         print(f"Visiting {url}")
 
-        # WebDriverWait(self.driver, 20).until(lambda d: d.execute_script("return document.readyState") == "complete")
-        # Wait for 5 seconds
-        # self.wait(5)
-        # self.driver.execute_script(f'document.querySelector(".js__phone").click()')
-
         self.wait(10)
         current_url = self.driver.current_url
         if current_url != url:
@@ -89,10 +72,10 @@ class Source1Crawler(BaseCrawler):
 
         seller = self.soup.select_one(".js__ob-agent-info")
         email_selector = seller.select_one("#email")
+        avatar_selector = seller.select_one("img")
         result['agent'] = {
-            'avatar': seller.select_one("a").get("href"),
+            'avatar': avatar_selector.get("src") if avatar_selector else None,
             'fullname': seller.select_one(".js_contact-name").get("title"),
-            # 'phone': self.soup.select_one(".js__phone").get("mobile"),
             'email': email_selector.get("data-email") if email_selector else None,
         }
 

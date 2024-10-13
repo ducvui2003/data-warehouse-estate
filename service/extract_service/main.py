@@ -2,7 +2,7 @@ from datetime import datetime
 
 from service.extract_service.src.config.setting import LIMIT_PAGE
 from service.extract_service.src.crawler.source_A_1_crawler import SourceA1Crawler
-from service.extract_service.src.util.file_util import write_json_to_csv
+from service.extract_service.src.util.file_util import write_json_to_csv, read_file_to_json
 
 
 def run_crawlers():
@@ -18,9 +18,11 @@ def run_crawlers():
 
 
 def run_crawler_source_A_1():
-    source1_crawler = SourceA1Crawler(LIMIT_PAGE)
-    print(f"Started crawl at: {source1_crawler.base_url}")
-    source1_crawler.handle()
+    # source1_crawler = SourceA1Crawler(LIMIT_PAGE)
+    # print(f"Started crawl at: {source1_crawler.base_url}")
+    # source1_crawler.handle()
+    json_list = read_file_to_json("source_1_2024_10_13__19_36.json")
+    write_json_to_csv("source_1_2024_10_13__19_36.csv", json_list)
 
 
 if __name__ == "__main__":

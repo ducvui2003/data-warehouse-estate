@@ -31,8 +31,7 @@ class Source1Crawler(BaseCrawler):
         for (natural_id, link) in id_link.items():
             item = self.crawlItem(link)
             if item is None:
-                item = []
-                item["error"] = "Can't crawl this item"
+                item = {"error": "Can't crawl this item"}
             item["natural_id"] = natural_id
             item["src"] = link
             items.append(item)

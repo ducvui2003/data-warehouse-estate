@@ -7,6 +7,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.os_manager import ChromeType
 
 
+
 class BaseCrawler:
     def __init__(self):
         self.driver = None
@@ -29,6 +30,7 @@ class BaseCrawler:
                 "profile.managed_default_content_settings.stylesheets": 2  # Disable CSS
             }
             chrome_options.add_experimental_option("prefs", prefs)
+
         self.driver = webdriver.Chrome(service=service, options=chrome_options)
 
     def get_url(self, url):

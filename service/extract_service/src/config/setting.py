@@ -9,13 +9,11 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 PATH_ENV = os.path.join(ROOT_DIR, ".env")
 load_dotenv(dotenv_path=PATH_ENV)
 config = dotenv_values(PATH_ENV)
-SOURCE_A_URL = config["SOURCE_A_URL"]
 os_name = platform.system()
-DRIVER_PATH = ""
-if os_name == "Windows":
-    DRIVER_PATH = os.path.join(ROOT_DIR, "driver/chromedriver-win64/chromedriver.exe")
-elif os_name == "Linux":
-    DRIVER_PATH = os.path.join(ROOT_DIR, "driver/chromedriver-linux64/chromedriver")
-U_BLOCK = os.path.join(ROOT_DIR, "driver/chromedriver-linux64/uBlock.crx")
-
+SOURCE_A_BASE = config["SOURCE_A_BASE"]
+SOURCE_A_1 = config["SOURCE_A_1"]
+SOURCE_A_2 = config["SOURCE_A_2"]
+SOURCE_A_3 = config["SOURCE_A_3"]
+LIMIT_ITEM = int(config["LIMIT_ITEM"])
+LIMIT_PAGE = int(config["LIMIT_PAGE"])
 FOLDER_DATA = os.path.join(ROOT_DIR.parent.parent, "data")

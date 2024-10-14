@@ -2,14 +2,15 @@ from datetime import datetime
 
 from selenium.common import WebDriverException
 
-from service.extract_service.src.config.setting import SOURCE_A_BASE, SOURCE_A_2
 from service.extract_service.src.crawler.paging_base_crawler import PagingBase
 from service.extract_service.src.util.file_util import write_json_to_csv, write_json_to_file
 
 
-class SourceA2Crawler(PagingBase):
-    _base_url = SOURCE_A_2
-    _domain = SOURCE_A_BASE
+class SourceACrawler(PagingBase):
+    def __init__(self, limit_page, base_url, domain):
+        super().__init__(limit_page)
+        self._domain = domain
+        self._base_url = base_url
 
     def crawl_page(self, page):
         url_page = f"{self._base_url}/p{page}"

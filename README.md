@@ -32,11 +32,9 @@ Make sure you have the following installed:
 ## Setup
 ### 1. Install environment (in root project)
 ```bash
-   python3 -m venv .venv
+   python -m venv .venv
+    .\venv\Scripts\activate
    pip install -r requirements.txt
 ```
-
-### 3. Run the project (in root project)
-```bash (extract_service)
-   python3 -m service.extract_service.main
-```
+#### PyCharms
+- File -> Settings -> Project -> Project Interpreter -> Add -> Existing environment -> Interpreter -> .venv\Scripts\python.exe (project)

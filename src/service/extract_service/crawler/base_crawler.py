@@ -4,14 +4,14 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.ie.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.os_manager import ChromeType
-
+from lxml import etree
 
 
 class BaseCrawler:
     def __init__(self):
-        self.driver = None
-        self.soup = None
+        self.etree: etree
+        self.driver: webdriver
+        self.soup: BeautifulSoup
 
     def setup_driver(self, headless=False, disable_resource=False):
         chrome_options = webdriver.ChromeOptions()
@@ -30,7 +30,6 @@ class BaseCrawler:
                 "profile.managed_default_content_settings.stylesheets": 2  # Disable CSS
             }
             chrome_options.add_experimental_option("prefs", prefs)
-
         self.driver = webdriver.Chrome(service=service, options=chrome_options)
 
     def get_url(self, url):
@@ -41,10 +40,11 @@ class BaseCrawler:
     def wait(self, seconds):
         time.sleep(seconds)
 
-    def filter_script(self, page_source):
+    def clean_html(self, page_source):
         self.soup = BeautifulSoup(page_source, "html.parser")
         for script in self.soup(["script", "style", "link", "meta", "iframe"]):
             script.decompose()
+        self.etree = etree.HTML(str(self.soup))
 
     def close(self):
         if self.driver:

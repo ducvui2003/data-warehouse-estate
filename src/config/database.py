@@ -24,7 +24,8 @@ class MySQLCRUD:
                 port=port,
                 user=user,
                 password=password,
-                database=database
+                database=database,
+                allow_local_infile=True
             )
             print(f"Connection pool created with pool size: {pool_size}")
         except Error as e:
@@ -67,7 +68,8 @@ class MySQLCRUD:
                     port=row["port"],
                     user=row["username"],
                     password=row["password"],
-                    database=row["name"]
+                    database=row["name"],
+                    allow_local_infile=True
                 )
                 print(f"Connection pool created with staging pool size: {CONTROLLER_DB_POOL_SIZE}")
         cursor.close()

@@ -15,6 +15,7 @@ class LoadFileIntoStaging:
 
         print("Starting execute_sql_with_dynamic_file...")
         try:
+            # 1. connect estate controller (call 1.hàm get_controller_connection)
             __connector_controller = Controller().get_connection_controller()
             print("Connection controller:", __connector_controller)
             __connector_staging = Staging().get_connection_staging()

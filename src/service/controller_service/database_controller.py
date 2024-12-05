@@ -36,6 +36,3 @@ class Controller:
         result = self.__connector.call_procedure(procedure_name, connection, args)
         # connection.close()
         return result
-
-    def get_connection_controller(self):
-        return self.__connector.get_controller_connection()

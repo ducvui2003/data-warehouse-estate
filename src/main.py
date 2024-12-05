@@ -1,26 +1,37 @@
-from src.config.setting import LIMIT_PAGE
-from src.service.extract_service.crawler.source_A_1_crawler import SourceA1Crawler
-from src.service.extract_service.crawler.source_B_1_crawler import SourceB1Crawler
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from src.service.controller_service.crawl_controller import CrawlController
+
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
-def run_crawlers():
-    # run_crawler_source_A_1()
-    run_crawler_source_B_1()
+@app.get("/")
+def read_root():
+    return {"message": "Hello, World!"}
 
 
-def run_crawler_source_A_1():
-    source1_crawler = SourceA1Crawler(LIMIT_PAGE)
-    print(f"Started crawl at: {source1_crawler.base_url}")
-    source1_crawler.handle()
+@app.get("/items/{item_id}")
+def read_item(item_id: int, q: str = None):
+    return {"item_id": item_id, "q": q}
 
 
-def run_crawler_source_B_1():
-    source1_crawler = SourceB1Crawler(LIMIT_PAGE)
-    print(f"Started crawl at: {source1_crawler.base_url}")
-    source1_crawler.handle()
+if __name__ == '__main__':
+    # uvicorn.run(
+    #     "src.main:app",
+    #     host=SERVER_HOST,
+    #     port=SERVER_PORT,
+    #     reload=True
+    # )
 
-
-if __name__ == "__main__":
-    print("Running crawlers...")
-    # result = get_config()
-    run_crawlers()
+    # 6. Crawl_Data:
+    # 6.1 Khởi tạo đối tượng CrawlController
+    c = CrawlController()
+    c.get_config()

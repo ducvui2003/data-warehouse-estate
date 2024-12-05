@@ -1,6 +1,6 @@
 import os
+from fileinput import filename
 from pathlib import Path
-
 import mysql.connector
 from mysql.connector import Error
 from src.service.controller_service.database_controller import Controller
@@ -11,80 +11,68 @@ class LoadFileIntoStaging:
     def __init__(self):
         self.has_run = False
         self.idConfig = None
-    def execute_sql_with_dynamic_file(self, sql_file_path, csv_file_path):
-
+    def load_file_to_staging(self):
         print("Starting execute_sql_with_dynamic_file...")
         try:
-            # 1. connect estate controller (call 1.hàm get_controller_connection)
-            __connector_controller = Controller().get_connection_controller()
-            print("Connection controller:", __connector_controller)
-            __connector_staging = Staging().get_connection_staging()
-            file_name = os.path.basename(csv_file_path)
-            print("file_name:", file_name)
-            status_result = Controller().call_controller_procedure('get_status_by_filename', (file_name,))
-            print("Status result:", status_result)
-            if status_result and 'status' in status_result:
-                status = status_result['status']
-                print("Status of file:", status)
-            else:
-                print(f"No valid status found for file '{file_name}'.")
-                status = None
-            if status == 'FILE_PENDING':
-                # Đọc file SQL và thay thế đường dẫn file động
-                with open(sql_file_path, 'r', encoding='utf-8') as file:
-                    sql_script = file.read().replace(
-                        'C:/Users/ADMIN/Downloads/data_batdongsan_com_vn.csv',
-                        csv_file_path
-                    )
-                    if 'batdongsan_com_vn' not in csv_file_path:
-                        sql_script = sql_script.replace(
-                            'estate_daily_temp_batdongsan_com_vn',
-                            'estate_daily_temp_muaban_net'
-                        )
+            # 1. kết nối estate controller and call procedure get_log_to_loadfile()  to get filepath
+            # *Dùng 4.1 hàm call_controller_procedure của Dataflow(Controller)*
+            result = Controller().call_controller_procedure('get_log_to_loadfile', ())
+            print(result)
+            # 2. Kiểm tra File path có tồn tại hay không
+            if result:
+                # file_name = (result['data_dir_path'] + '\\'+ result['file_name'])
+                file_name = result['data_dir_path'].replace("\\", "/") + '/' + result['file_name']
+                print(file_name)
+                name_table = None
+                if(result['resource_id'] == 1):
+                    name_table = 'estate_daily_temp_batdongsan_com_vn'
+                else:
+                    name_table = 'estate_daily_temp_muaban_net'
+                # 2.1 Yes: Call procedure load_command_file(file_name,table_name) lấy command để thực thi
+                command = Controller().call_staging_procedure('load_command_file', (file_name,name_table,))
+                command_sql = command.get('generated_sql', '')
+                if not command_sql:
+                    print("No SQL command generated!")
+                    return
+                # 3. Kết nối Db Staging
+                try:
+                    connector_staging = Staging().get_connection_staging()
+                    cursor = connector_staging.cursor()
+                    # 4. thực thi các câu lệnh trong command
+                    for statement in command_sql.split(';'):
+                        statement = statement.strip()
+                        if statement:
+                            try:
+                                cursor.execute(statement)
+                                print(f"Executed: {statement}")
+                                while cursor.nextset():
+                                    pass
+                            except Error as sql_error:
+                                print(f"SQL execution error: {sql_error}")
+                                continue  # Tiếp tục với câu lệnh SQL khác
+                    connector_staging.commit()
+                    cursor.close()
+                except Error as e:
+                    print(f"Database connection or execution error: {e}")
 
-                cursor = __connector_staging.cursor()
-                for statement in sql_script.split(';'):
-                    statement = statement.strip()
-                    if statement:
-                        cursor.execute(statement)
-                        print(f"Executed: {statement}")
-                        while cursor.nextset():
-                            pass
+                id = result['id']
+                # 5. Update logs.status = 'STAGING_PENDING'
+                try:
+                    Controller().call_controller_procedure('update_log_loadFile', (id, 'TRANSFORM_PENDING'))
+                    print("Log status updated successfully.")
+                except Error as e:
+                    print(f"Error while updating log: {e}")
 
-                __connector_staging.commit()
                 print("SQL script with dynamic file path executed successfully.")
-                self.update_log_status(__connector_controller, file_name, 'WAREHOUSE_PENDING')
-                return  # Dừng lại sau khi đã hoàn tất
+                return
+                # 2.2 No
             else:
-                print("CSV file path not found in the list of pending files.")
-                return  # Trả về nếu tệp CSV không có trong danh sách
+                print("SEND MAIL ERROR.")
+                return
+
         except Error as e:
-            print(f"Error: {e}")
-
-        finally:
-            if 'cursor' in locals() and cursor is not None:
-                cursor.close()
-            if '__connector_staging' in locals() and __connector_staging.is_connected():
-                __connector_staging.close()
-        
-    def update_log_status(self, connection, csv_file_path, status):
-        try:
-            cursor = connection.cursor()
-            # Gọi thủ tục
-            cursor.callproc('update_log_status', (csv_file_path, status))
-            # Commit thay đổi
-            connection.commit()
-            print("Cập nhật thành công.")
-        except mysql.connector.Error as err:
-            print(f"Lỗi: {err}")
-        finally:
-            cursor.close()
+            print(f"Error: {e} ")
 
 
-# Đường dẫn tệp SQL và CSV
-sql_file_path = 'C:/Users/ADMIN/Desktop/IT_Data/Data Warehouse/data/load_file_to_staging.sql'
-csv_file_path = 'C:/Users/ADMIN/Downloads/data_batdongsan_com_vn_day_2.csv'
-
-# Khởi tạo đối tượng và gọi hàm
 loader = LoadFileIntoStaging()
-loader.execute_sql_with_dynamic_file(sql_file_path, csv_file_path)
+loader.load_file_to_staging()

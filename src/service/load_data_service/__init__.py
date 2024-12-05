@@ -5,6 +5,8 @@ import mysql.connector
 from mysql.connector import Error
 from src.service.controller_service.database_controller import Controller
 from src.service.load_data_service.database_staging import Staging
+import asyncio
+from src.service.notification_service.email import sent_mail, EmailCategory
 
 
 def load_file_to_staging():
@@ -28,7 +30,8 @@ def load_file_to_staging():
             command = Controller().call_staging_procedure('load_command_file', (file_name,name_table,))
             command_sql = command.get('generated_sql', '')
             if not command_sql:
-                print("No SQL command generated!")
+                asyncio.run(sent_mail("CAN`T CALL PROCEDURE load_command_file", EmailCategory.ERROR))
+                print("CAN`T CALL PROCEDURE load_command_file")
                 return
             # 3. Kết nối Db Staging
             try:
@@ -50,25 +53,26 @@ def load_file_to_staging():
                 cursor.close()
             except Error as e:
                 print(f"Database connection or execution error: {e}")
-
+                asyncio.run(sent_mail("CAN`T CONNECT TO DATABASE", EmailCategory.ERROR))
+                return
             id = result['id']
-            # 5. Update logs.status = 'STAGING_PENDING'
+            # 5. Update logs.status = 'TRANSFORM_PENDING'
             try:
                 Controller().call_controller_procedure('update_log_loadFile', (id, 'TRANSFORM_PENDING'))
                 print("Log status updated successfully.")
             except Error as e:
+                asyncio.run(sent_mail("CAN`T UPDATE STATUS TO TRANSFORM_PENDING", EmailCategory.ERROR))
                 print(f"Error while updating log: {e}")
-
+            asyncio.run(sent_mail("LOAD FILE SUCCESSFULLY", EmailCategory.INFO))
             print("SQL script with dynamic file path executed successfully.")
             return
             # 2.2 No
         else:
-            print("SEND MAIL ERROR.")
+            asyncio.run(sent_mail("FILE PATH DOESN`T EXIST", EmailCategory.ERROR))
             return
 
     except Error as e:
         print(f"Error: {e} ")
-
 
 
 

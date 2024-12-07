@@ -3,17 +3,16 @@ from fileinput import filename
 from pathlib import Path
 import mysql.connector
 from mysql.connector import Error
-from src.service.controller_service.database_controller import Controller
+from src.service.load_data_service.database_staging import Staging
 from src.service.load_data_service.database_staging import Staging
 import asyncio
-from src.service.notification_service.email import sent_mail, EmailCategory
 
 
 def load_file_to_staging():
     print("Starting execute_sql_with_dynamic_file...")
     try:
         # 1. Kết nối estate controller và gọi procedure get_log_to_loadfile()
-        result = Controller().call_controller_procedure('get_log_to_loadfile', ())
+        result = Staging().call_controller_procedure('get_log_to_loadfile', ())
         print(result)
 
         # 2. Kiểm tra File path có tồn tại hay không
@@ -29,7 +28,7 @@ def load_file_to_staging():
 
             # 2.1 Gọi procedure load_command_file
             try:
-                command = Controller().call_staging_procedure('load_command_file', (file_name, name_table,))
+                command = Staging().call_staging_procedure('load_command_file', (file_name, name_table,))
                 command_sql = command.get('generated_sql', '')
                 if not command_sql:
                     raise RuntimeError("Procedure load_command_file did not return valid SQL commands.")
@@ -63,7 +62,7 @@ def load_file_to_staging():
 
             # 5. Gọi procedure update_isDelete_loadFile
             try:
-                Controller().call_controller_procedure('update_isDelete_loadFile', (result['id'],))
+                Staging().call_controller_procedure('update_isDelete_loadFile', (result['id'],))
                 print("Log status updated successfully.")
             except Exception as update_error:
                 print(f"Error while updating log status: {update_error}")

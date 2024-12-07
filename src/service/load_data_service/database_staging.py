@@ -14,10 +14,16 @@ class Staging:
             user=CONTROLLER_DB_USER,
             password=CONTROLLER_DB_PASS,
             pool_name=CONTROLLER_DB_POOL_NAME,
-            pool_size=CONTROLLER_DB_POOL_SIZE,
+            pool_size=CONTROLLER_DB_POOL_SIZE
         )
 
         print(f"Connection pool created with pool size: {CONTROLLER_DB_POOL_SIZE}")
+
+    def call_controller_procedure(self, procedure_name, args):
+        connection = self.__connector.get_controller_connection()
+        result = self.__connector.call_procedure(procedure_name, connection, args)
+        # connection.close()
+        return result
 
     def call_staging_procedure(self, procedure_name, args):
         connection = self.__connector.get_staging_connection()
@@ -25,5 +31,10 @@ class Staging:
         # connection.close()
         return result
 
+    def call_warehouse_procedure(self, procedure_name, args, header):
+        connection = self.__connector.get_warehouse_connection()
+        result = self.__connector.call_procedure(procedure_name, connection, args)
+        # connection.close()
+        return result
     def get_connection_staging(self):
-        return self.__connector.get_staging_connection()
+        return self.__connector.get_warehouse_connection()

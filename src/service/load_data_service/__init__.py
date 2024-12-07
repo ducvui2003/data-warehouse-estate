@@ -12,32 +12,37 @@ from src.service.notification_service.email import sent_mail, EmailCategory
 def load_file_to_staging():
     print("Starting execute_sql_with_dynamic_file...")
     try:
-        # 1. kết nối estate controller and call procedure get_log_to_loadfile()  to get filepath
-        # *Dùng 4.1 hàm call_controller_procedure của Dataflow(Controller)*
+        # 1. Kết nối estate controller và gọi procedure get_log_to_loadfile()
         result = Controller().call_controller_procedure('get_log_to_loadfile', ())
         print(result)
+
         # 2. Kiểm tra File path có tồn tại hay không
         if result:
-            # file_name = (result['data_dir_path'] + '\\'+ result['file_name'])
             file_name = result['data_dir_path'].replace("\\", "/") + '/' + result['file_name']
             print(file_name)
+
             name_table = None
-            if(result['resource_id'] == 1):
+            if result['resource_id'] == 1:
                 name_table = 'estate_daily_temp_batdongsan_com_vn'
             else:
                 name_table = 'estate_daily_temp_muaban_net'
-            # 2.1 Yes: Call procedure load_command_file(file_name,table_name) lấy command để thực thi
-            command = Controller().call_staging_procedure('load_command_file', (file_name,name_table,))
-            command_sql = command.get('generated_sql', '')
-            if not command_sql:
-                asyncio.run(sent_mail("CAN`T CALL PROCEDURE load_command_file", EmailCategory.ERROR))
-                print("CAN`T CALL PROCEDURE load_command_file")
-                return
-            # 3. Kết nối Db Staging
+
+            # 2.1 Gọi procedure load_command_file
+            try:
+                command = Controller().call_staging_procedure('load_command_file', (file_name, name_table,))
+                command_sql = command.get('generated_sql', '')
+                if not command_sql:
+                    raise RuntimeError("Procedure load_command_file did not return valid SQL commands.")
+            except Exception as e:
+                print(f"Error while calling load_command_file: {e}")
+                raise  # Chuyển tiếp lỗi ra ngoài
+
+            # 3. Kết nối DB Staging
             try:
                 connector_staging = Staging().get_connection_staging()
                 cursor = connector_staging.cursor()
-                # 4. thực thi các câu lệnh trong command
+
+                # 4. Thực thi các câu lệnh trong command_sql
                 for statement in command_sql.split(';'):
                     statement = statement.strip()
                     if statement:
@@ -48,32 +53,31 @@ def load_file_to_staging():
                                 pass
                         except Error as sql_error:
                             print(f"SQL execution error: {sql_error}")
-                            continue  # Tiếp tục với câu lệnh SQL khác
+                            raise  # Chuyển tiếp lỗi ra ngoài
+
                 connector_staging.commit()
                 cursor.close()
-            except Error as e:
-                print(f"Database connection or execution error: {e}")
-                asyncio.run(sent_mail("CAN`T CONNECT TO DATABASE", EmailCategory.ERROR))
-                return
-            id = result['id']
-            # 5. Update logs.status = 'TRANSFORM_PENDING'
+            except Error as db_error:
+                print(f"Database connection or execution error: {db_error}")
+                raise  # Chuyển tiếp lỗi ra ngoài
+
+            # 5. Gọi procedure update_isDelete_loadFile
             try:
-                Controller().call_controller_procedure('update_log_loadFile', (id, 'TRANSFORM_PENDING'))
+                Controller().call_controller_procedure('update_isDelete_loadFile', (result['id'],))
                 print("Log status updated successfully.")
-            except Error as e:
-                asyncio.run(sent_mail("CAN`T UPDATE STATUS TO TRANSFORM_PENDING", EmailCategory.ERROR))
-                print(f"Error while updating log: {e}")
-            asyncio.run(sent_mail("LOAD FILE SUCCESSFULLY", EmailCategory.INFO))
+            except Exception as update_error:
+                print(f"Error while updating log status: {update_error}")
+                raise  # Chuyển tiếp lỗi ra ngoài
+
             print("SQL script with dynamic file path executed successfully.")
-            return
-            # 2.2 No
         else:
-            asyncio.run(sent_mail("FILE PATH DOESN`T EXIST", EmailCategory.ERROR))
-            return
+            print('FILE NOT EXIST')
+            raise FileNotFoundError("File not found for loading to staging.")
+    except Exception as e:
+        print(f"Unhandled error: {e}")
+        raise  # Chuyển tiếp lỗi ra ngoài
 
-    except Error as e:
-        print(f"Error: {e} ")
 
 
-
-load_file_to_staging()
+if __name__ == "__main__":
+    load_file_to_staging()

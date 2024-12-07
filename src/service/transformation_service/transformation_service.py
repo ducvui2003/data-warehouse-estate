@@ -31,14 +31,7 @@ class Transformation:
                 # estate_staging.estate_daily_temp_batdongsan_com_vn
                 # sang estate_staging.estate_daily_batdongsan_com_vn
                 # param: procedure transform_batdongsan_com_vn
-                self._controller.call_staging_procedure(transform_batdongsan_com_vn, ())
-
-                # 17.2.2 gọi hàm call_controller_procedure (4.1)
-                # để bắt đầu load dữ liệu từ
-                # sang estate_staging.estate_daily_batdongsan_com_vn
-                # sang estate_warehouse.fact_estate
-                # param: procedure load_staging_warehouse_batdongsan_com_vn
-                result = self._controller.call_staging_procedure(load_staging_warehouse_batdongsan_com_vn, ())
+                result = self._controller.call_staging_procedure(transform_batdongsan_com_vn, ())
 
                 # 17.2.3 Lấy ra giá trị row_count từ procedure trên set lại vào row_count
                 count_row = result['count_row']
@@ -51,19 +44,12 @@ class Transformation:
                 # estate_staging.estate_daily_temp_muaban_net
                 # sang estate_staging.estate_daily_muaban_net
                 # param: procedure transform_muabna_net
-                self._controller.call_staging_procedure(transform_muaban_net, ())
+                result = self._controller.call_staging_procedure(transform_muaban_net, ())
 
-                # 17.3.2 gọi hàm call_controller_procedure (4.1)
-                # để bắt đầu load dữ liệu từ
-                # sang estate_staging.estate_daily_muaban_net
-                # sang estate_warehouse.fact_estate
-                # param: procedure load_staging_warehouse_muaban_net
-                result = self._controller.call_staging_procedure(load_staging_warehouse_muaban_net, ())
-
-                # 17.3.3 Lấy ra giá trị row_count từ procedure trên set lại vào row_count
+                # 17.3.2 Lấy ra giá trị row_count từ procedure trên set lại vào row_count
                 count_row = result['count_row']
             else:
-               # Ném ra ngoại lệ để báo source không tồn tại
+                # Ném ra ngoại lệ để báo source không tồn tại
                 raise AppException(message='Source not found')
             # 17.5 Gọi hàm handle_success
             return self.handle_success(count_row)
@@ -71,14 +57,20 @@ class Transformation:
             # 17.4 Gọi hàm handle_exception
             return self.handle_exception(e)
 
+    # 18
     def handle_success(self, count_row):
+        # 18.1 Khởi tạo email template
         email_template = EmailTemplate(subject="TRANSFORMATION SUCCESS",
                                        status=STATUS.STAGING_PENDING.name,
                                        code=STATUS.STAGING_PENDING.value,
                                        message="Success",
                                        file_log=None,
                                        label=LABEL.INFO)
+
+        # 18.2 Tiến hành gửi mail
         email_template.sent_mail()
+
+        # 18.3 Trả về giá trị để cập nhập trạng thái lên controller
         return {
             'file': None,
             'error_file_name': None,
@@ -87,15 +79,15 @@ class Transformation:
         }
 
     def handle_exception(self, exception: AppException):
-        # 11.1 Tạo file name error
+        # 19.1 Tạo file name error
         filename = f"{self._prefix}{self._file_format}.log"
         path = os.path.join(self._error_dir_path, filename)
-        # 11.2 cài đặt file name error vào exception
+        # 19.2 cài đặt file name error vào exception
         exception.file_error = filename
         exception._status = STATUS.STAGING_ERROR
-        # 11.3 gọi hàm handler_exception trong exception (15)
+        # 19.3 gọi hàm handler_exception trong exception (15)
         exception.handle_exception("TRANSFORMATION ERROR")
-        # 11.4 Trả về giá trị gồm file, error file name, count row, status
+        # 19.4 Trả về giá trị gồm file, error file name, count row, status
         return {
             'file': None,
             'error_file_name': path,

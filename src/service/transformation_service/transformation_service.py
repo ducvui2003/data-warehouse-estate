@@ -21,22 +21,58 @@ class Transformation:
         self._error_dir_path = error_dir_path
 
     def handle(self):
+        # 17.1 Khởi tạo count_row để đếm số dòng transform
         count_row = 0
         try:
+            # 17.2 Kiểm tra source == 'batdongsan.com.vn'
             if self._source == 'batdongsan.com.vn':
+                # 17.2.1 gọi hàm call_controller_procedure (4.1)
+                # để bắt đầu transform data từ
+                # estate_staging.estate_daily_temp_batdongsan_com_vn
+                # sang estate_staging.estate_daily_batdongsan_com_vn
+                # param: procedure transform_batdongsan_com_vn
                 self._controller.call_staging_procedure(transform_batdongsan_com_vn, ())
-                count_row = self._controller.call_staging_procedure(load_staging_warehouse_batdongsan_com_vn, ())
+
+                # 17.2.2 gọi hàm call_controller_procedure (4.1)
+                # để bắt đầu load dữ liệu từ
+                # sang estate_staging.estate_daily_batdongsan_com_vn
+                # sang estate_warehouse.fact_estate
+                # param: procedure load_staging_warehouse_batdongsan_com_vn
+                result = self._controller.call_staging_procedure(load_staging_warehouse_batdongsan_com_vn, ())
+
+                # 17.2.3 Lấy ra giá trị row_count từ procedure trên set lại vào row_count
+                count_row = result['count_row']
+
+            # 17.3 Kiểm tra source == 'muaban.net/bat-dong-san'
             elif self._source == 'muaban.net/bat-dong-san':
+
+                # 17.3.1 gọi hàm call_controller_procedure (4.1)
+                # để bắt đầu transform data từ
+                # estate_staging.estate_daily_temp_muaban_net
+                # sang estate_staging.estate_daily_muaban_net
+                # param: procedure transform_muabna_net
                 self._controller.call_staging_procedure(transform_muaban_net, ())
-                count_row = self._controller.call_staging_procedure(load_staging_warehouse_muaban_net, ())
+
+                # 17.3.2 gọi hàm call_controller_procedure (4.1)
+                # để bắt đầu load dữ liệu từ
+                # sang estate_staging.estate_daily_muaban_net
+                # sang estate_warehouse.fact_estate
+                # param: procedure load_staging_warehouse_muaban_net
+                result = self._controller.call_staging_procedure(load_staging_warehouse_muaban_net, ())
+
+                # 17.3.3 Lấy ra giá trị row_count từ procedure trên set lại vào row_count
+                count_row = result['count_row']
             else:
+               # Ném ra ngoại lệ để báo source không tồn tại
                 raise AppException(message='Source not found')
+            # 17.5 Gọi hàm handle_success
             return self.handle_success(count_row)
-        except AppException  as e:
+        except AppException as e:
+            # 17.4 Gọi hàm handle_exception
             return self.handle_exception(e)
 
     def handle_success(self, count_row):
-        email_template = EmailTemplate(subject="Sent data to warehouse",
+        email_template = EmailTemplate(subject="TRANSFORMATION SUCCESS",
                                        status=STATUS.STAGING_PENDING.name,
                                        code=STATUS.STAGING_PENDING.value,
                                        message="Success",
@@ -47,7 +83,7 @@ class Transformation:
             'file': None,
             'error_file_name': None,
             'count_row': count_row,
-            'status': 'STAGING_SUCCESS'
+            'status': 'STAGING_SUCCESS -> WAREHOUSE_PENDING'
         }
 
     def handle_exception(self, exception: AppException):
@@ -58,7 +94,7 @@ class Transformation:
         exception.file_error = filename
         exception._status = STATUS.STAGING_ERROR
         # 11.3 gọi hàm handler_exception trong exception (15)
-        exception.handle_exception()
+        exception.handle_exception("TRANSFORMATION ERROR")
         # 11.4 Trả về giá trị gồm file, error file name, count row, status
         return {
             'file': None,

@@ -7,7 +7,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
 import uvicorn
 
-from src.service.controller_service.transformation_controller import TransformationController
+from src.service.controller_service.transformation_controller import TransformController
 
 app = FastAPI()
 scheduler = BackgroundScheduler()
@@ -19,7 +19,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 crawl_controller = CrawlController()
-transformation_controller = TransformationController()
+transform_controller = TransformController()
 
 
 def crawl_data():
@@ -42,14 +42,8 @@ def load_data_from_file_to_staging():
 # Hiện thực code ở thư mục src/service/transform_service
 def transforms_data():
     # Lấy cấu từ controller
-    transformation_controller.get_config()
+    transform_controller.get_config()
 
-# Hàm này dùng để load data từ staging vào warehouse
-# Hiện thực code ở thư mục src/service/load_data_warehourse_service
-def load_data_from_staging_to_warehouse():
-    # Lấy cấu từ controller
-    # crawl_controller.call_staging_procedure('load_data_from_staging_to_warehouse', ())
-    pass
 
 # Hàm này dùng để load data từ warehouse vào data mart
 # Hiện thực code ở thư mục src/service/aggerate_service

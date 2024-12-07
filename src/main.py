@@ -31,6 +31,7 @@ def crawl_data():
 def insert_new_log_crawler_daily():
     crawl_controller.call_controller_procedure('insert_new_log_crawler_daily', ())
 
+
 # HÀm này dùng để load data từ file vào staging
 # Hiện thực code ở thư mục src/service/load_data_service
 def load_data_from_file_to_staging():
@@ -38,12 +39,19 @@ def load_data_from_file_to_staging():
     # crawl_controller.call_staging_procedure('load_data_from_file_to_staging', ())
     pass
 
+
 # Hàm này dùng để transform data
 # Hiện thực code ở thư mục src/service/transform_service
 def transforms_data():
-    # Lấy cấu từ controller
+    # 16.1. sử hàm getConfig của crawlController đã tạo trước đó
     transform_controller.get_config()
 
+# Hàm này dùng để load data từ staging vào warehouse
+# Hiện thực code ở thư mục src/service/load_data_warehourse_service
+def load_data_from_staging_to_warehouse():
+    # Lấy cấu từ controller
+    # crawl_controller.call_staging_procedure('load_data_from_staging_to_warehouse', ())
+    pass
 
 # Hàm này dùng để load data từ warehouse vào data mart
 # Hiện thực code ở thư mục src/service/aggerate_service

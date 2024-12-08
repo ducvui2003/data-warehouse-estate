@@ -18,7 +18,7 @@ class Warehouse:
         )
 
         print(f"Connection pool created with pool size: {CONTROLLER_DB_POOL_SIZE}")
-
+    #2. Kiểm tra kết nối đến DB Warehouse
     def call_warehouse_procedure(self, procedure_name, args, header):
         connection = self.__connector.get_warehouse_connection()
         result = self.__connector.call_procedure(procedure_name, connection, args)

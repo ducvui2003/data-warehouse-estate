@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
 from src.config.setting import SERVER_HOST, SERVER_PORT
+from src.service.aggregate_service.insert_data_agg import insert_data_aggregate
 from src.service.controller_service.crawl_controller import CrawlController
 from apscheduler.triggers.interval import IntervalTrigger
 from apscheduler.triggers.cron import CronTrigger
@@ -49,11 +50,10 @@ def transforms_data():
 # Hiện thực code ở thư mục src/service/load_data_warehourse_service
 def load_data_from_staging_to_warehouse():
     # Lấy cấu từ controller
-    # crawl_controller.call_staging_procedure('load_data_from_staging_to_warehouse', ())
-    pass
+    insert_data_aggregate()
 
 # Hàm này dùng để load data từ warehouse vào data mart
-# Hiện thực code ở thư mục src/service/aggerate_service
+# Hiện thực code ở thư mục src/service/aggregate_service
 def load_data_from_warehouse_to_data_mart():
     # Lấy cấu từ controller
     # crawl_controller.call_staging_procedure('load_data_from_warehouse_to_data_mart', ())

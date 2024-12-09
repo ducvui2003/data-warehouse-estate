@@ -70,7 +70,7 @@ class PagingBase(BaseCrawler):
             return self.handle_success()
         except AppException  as e:
             # 7.8 Gọi hàm handle_exception() để xử lý lỗi
-            return self.handle_exception(e)
+            return self.handle_error(e)
 
     # 13
     def crawl_item(self, url, scenario):
@@ -165,7 +165,7 @@ class PagingBase(BaseCrawler):
         }
 
     # 11 Xử lý ngoại lệ
-    def handle_exception(self, exception: AppException):
+    def handle_error(self, exception: AppException):
         # 11.1 Tạo file name error
         filename = f"{self._prefix}{self._file_format}.log"
         path = os.path.join(self._error_dir_path, filename)
@@ -181,8 +181,8 @@ class PagingBase(BaseCrawler):
             'status': 'STAGING_ERROR'
         }
 
+    # 9
     def find_element_by_config(self, field_properties):
-        # print(field_properties)
         # 9.1 Khởi tạo các biến, trích xuất config field vào các biến
         method = field_properties.get("method", None)
         selector = field_properties.get("selector", None)

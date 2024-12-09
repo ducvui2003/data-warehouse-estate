@@ -1,9 +1,11 @@
 # Hàm này dùng để load data từ staging vào warehouse
 # Hiện thực code ở thư mục src/service/load_data_warehourse_service
+from src.service.load_data_service import load_file_to_staging
+
+
 def load_data_from_staging_to_warehouse():
     # Lấy cấu từ controller
-    # crawl_controller.call_staging_procedure('load_data_from_staging_to_warehouse', ())
-    pass
+    load_file_to_staging()
 
 
 if __name__ == '__main__':

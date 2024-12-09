@@ -16,14 +16,14 @@ def load_file_to_staging():
 
         # **2. Kiểm tra có kết quả trả về hay không**
         if result:
-            file_name = result['data_dir_path'].replace("\\", "/") + '/' + result['file_name']
+            file_name = result['file_name'].replace("\\", "/")
             print(file_name)
 
             # **2.1  Call procedure_staging load_command_file(file_name,table_name) lấy command để thực thi
             # Gọi lại WF 4.2 hàm call_procedure_controller (DataflowController)
             try:
                 command = Staging().call_staging_procedure('load_command_file', (file_name, result['resource_id'],))
-                command_sql = command.get('generated_sql', '')
+                command_sql = command["generated_sql"]
                 if not command_sql:
                     raise RuntimeError("Procedure load_command_file did not return valid SQL commands.")
                 # **2.2 Raise error nếu không lấy được lệnh SQL**
@@ -57,7 +57,7 @@ def load_file_to_staging():
                 print(f"Database connection or execution error: {db_error}")
                 raise  # Chuyển tiếp lỗi ra ngoài
 
-            # **5. Gọi procedure update_isDelete_loadFile**5. Kết nối Staging để call_procedure
+                # **5. Gọi procedure update_isDelete_loadFile**5. Kết nối Staging để call_procedure
                 # 'update_isDelete_loadFile' để cập nhật isDelete = 1call_controller_procedure('update_isDelete_loadFile', (result['id'],))
                 # **6. Kiểm tra có update thành công hay không**
                 # 6.1 Kết thúc tiến trình

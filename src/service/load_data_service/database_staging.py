@@ -32,5 +32,5 @@ class Staging:
         return result
 
     def get_connection_staging(self):
-        connection = self.__connector.get_warehouse_connection()
+        connection = self.__connector.get_staging_connection()
         return connection

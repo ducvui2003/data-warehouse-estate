@@ -27,7 +27,7 @@ class AppException(Exception):
         self._file_name = file_name
 
     # 15
-    def handle_exception(self, subject: str):
+    def handle_exception(self):
         # 15.1 Kiểm tra level là thuộc level error
         if self._status is not None and self._status in STATUS_ERROR:
             self._handle_save_error_log()

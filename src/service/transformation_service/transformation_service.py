@@ -55,7 +55,7 @@ class Transformation:
             return self.handle_success(count_row)
         except AppException as e:
             # 17.4 Gọi hàm handle_exception
-            return self.handle_exception(e)
+            return self.handle_error(e)
 
     # 18
     def handle_success(self, count_row):
@@ -78,7 +78,8 @@ class Transformation:
             'status': 'STAGING_SUCCESS -> WAREHOUSE_PENDING'
         }
 
-    def handle_exception(self, exception: AppException):
+    # 19
+    def handle_error(self, exception: AppException):
         # 19.1 Tạo file name error
         filename = f"{self._prefix}{self._file_format}.log"
         path = os.path.join(self._error_dir_path, filename)
@@ -86,7 +87,7 @@ class Transformation:
         exception.file_error = filename
         exception._status = STATUS.STAGING_ERROR
         # 19.3 gọi hàm handler_exception trong exception (15)
-        exception.handle_exception("TRANSFORMATION ERROR")
+        exception.handle_exception()
         # 19.4 Trả về giá trị gồm file, error file name, count row, status
         return {
             'file': None,

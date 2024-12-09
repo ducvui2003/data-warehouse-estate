@@ -13,7 +13,7 @@ BEGIN
         error_file_name = _error_file_name,
         count_row       = _count_row,
         is_delete       = 1
-    WHERE status = 'STAGING_PENDING'
+    WHERE status = 'STAGING_PROCESSING'
       AND config_id = _config_id;
 
     if _status = 'STAGING_ERROR' THEN

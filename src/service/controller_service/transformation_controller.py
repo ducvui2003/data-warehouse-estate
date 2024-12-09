@@ -34,7 +34,8 @@ class TransformController(Controller):
             result['error_file_name'],
             result['status']))
 
-#Test
+
+# Test
 if __name__ == '__main__':
     c = TransformController()
     c.get_config()

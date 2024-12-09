@@ -37,3 +37,5 @@ class Controller:
         # connection.close()
         return result
 
+    def get_staging_connection(self):
+        return self.__connector.get_staging_connection()

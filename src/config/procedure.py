@@ -1,5 +1,11 @@
+insert_new_log_crawler = "insert_new_log_crawler"
 procedure_get_database_config = "get_database_config"
 insert_new_log_crawler_daily = "insert_new_log_crawler_daily"
+
+insert_log_staging = "insert_log_staging"
+get_log_staging = "get_log_staging"
+get_script_load_file_by_source = "get_script_load_file_by_source"
+
 get_log_crawler = "get_log_crawler"
 insert_log_crawler = "insert_log_crawler"
 get_log_transform = "get_log_transform"

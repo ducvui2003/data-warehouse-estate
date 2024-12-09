@@ -11,4 +11,4 @@ def transforms_data():
 
 
 if __name__ == '__main__':
-    transforms_data();
+    transforms_data()

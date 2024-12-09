@@ -1,0 +1,60 @@
+Các bước thực hiện transformation từ estate_temp sang estate_warehouse
+- Giai đoạn 1: Thực hiện transformation
+	Bước 1: Xóa các record không hợp lệ (record không hợp lệ là subject = NULL, price = NULL, price='Thỏa thuận', area = NULL, address = NULL)
+
+	Bước 2: Xử lý create_at, start_date, end_date
+	Bước 2.1 Tạo bảng tạm temp_date ở staging
+		sk         BIGINT PRIMARY KEY,
+        create_at  INT,
+        start_date INT,
+        end_date   INT
+    Bước 2.2: Lấy ra id của dim_date bằng cách so sánh full_date của dim_date với create_at, start_date, end_date
+    Bước 2.3: Insert id của dim_date trên vào bảng temp_date, sử dụng sk để phân biệt
+
+    Bước 3: Xử lý address
+    Bước 3.1 Tai bảng tạm temp_address ở staging
+        sk         BIGINT PRIMARY KEY,
+        ward_id    VARCHAR(255),
+        detail     VARCHAR(255)
+    Bước 3.2: Trích xuất province, district, ward, detail từ address
+    Bước 3.3: Lấy ra id của ward bằng cách so sánh name của ward với ward, district với district, province với province
+    Bước 3.4: Insert id của ward vào bảng temp_address, sử dụng sk để phân biệt
+
+    Bước 4: Insert các field từ estate_temp table sang estate
+    Bước 4.1 Field address được chuyển thành ward_id và detail trong temp_address
+    Bước 4.2 Field create_at, start_date, end_date được chuyển thành id trong temp_date
+    Bước 4.3 Field price được chuyển thành giá trị số (đơn vị chung là tỷ)
+    Bước 4.4 Field area được chuyển thành giá trị số (đơn vị chung là m2)
+    Bước 4.5 Field floors, bathroom, bedroom được chuyển thành giá trị số (đơn vị chung là phòng)
+
+- Giai đoạn 2: Load từ table estate từ estate_staging sang table estate estate_warehouse
+
+    Bước 1: Tạo bảng temp_estate_update ở estate_staging để lưu các record cần update
+        sk              bigint primary key,
+        nk              varchar(100),
+        subject         varchar(255) null,
+        price           double       null,
+        area            double       null,
+        ward_sk         varchar(20)  null,
+        address_detail  varchar(255) null,
+        description     longtext     null,
+        orientation     varchar(255) null,
+        floors          int          null,
+        bedroom         int          null,
+        bathroom        int          null,
+        images          json         null,
+        legal           varchar(255) null,
+        url             varchar(255) null,
+        start_date      int          null,
+        end_date        int          null,
+        create_at       int          null,
+        seller_fullname varchar(255) null,
+        seller_phone    varchar(50)  null,
+        seller_email    varchar(255) null
+
+    Bước 2: Insert các record cần update vào bảng temp_estate_update. Xác định bằng cách so sánh từng field trong estate của estate_staging với estate của estate_warehouse
+    Bước 3: Update trạng thái hết hạn cho các row cần cập nhật trong estate_warehouse
+            Trạng thái hết hạn là field active = FALSE và dt_expired = NOW
+    Bước 4: Insert các record trong temp_estate_update vào estate_warehouse
+    Bước 5: Insert các record trong estate estate_staging không tồn tại trong estate estate_warehouse vào estate estate_warehouse
+            Khi insert vào estate_warehouse, field active = TRUE và dt_expired = '9999-12-31 23:59:59' (đánh dấu trạng thái đang được dùng)

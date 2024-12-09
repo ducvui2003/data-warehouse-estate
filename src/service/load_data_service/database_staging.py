@@ -3,7 +3,7 @@ from src.config.setting import CONTROLLER_DB_PORT, CONTROLLER_DB_HOST, CONTROLLE
     CONTROLLER_DB_PASS, CONTROLLER_DB_POOL_NAME, CONTROLLER_DB_POOL_SIZE
 
 
-class Controller:
+class Staging:
     __connector: MySQLCRUD = None
 
     def __init__(self):
@@ -31,8 +31,6 @@ class Controller:
         # connection.close()
         return result
 
-    def call_warehouse_procedure(self, procedure_name, args, header):
+    def get_connection_staging(self):
         connection = self.__connector.get_warehouse_connection()
-        result = self.__connector.call_procedure(procedure_name, connection, args)
-        # connection.close()
-        return result
+        return connection

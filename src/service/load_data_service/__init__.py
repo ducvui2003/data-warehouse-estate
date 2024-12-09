@@ -15,21 +15,21 @@ def load_file_to_staging():
     print("Starting execute_sql_with_dynamic_file...")
     staging = Staging()
     try:
-        # **1. Kết nối Staging và gọi procedure get_log_to_loadfile()**
+        # **1. Kết nối Staging và gọi procedure get_log_staging()**
         # gọi lai hàm  4.1.hàm call_controller_procedure(DataflowController)
 
         result = staging.call_controller_procedure('get_log_staging', ())
 
         # **2. Kiểm tra có kết quả trả về hay không**
         if result:
-            config_id = result['id']
+            config_id = result['config_id']
             file_path = result['file_path']
             error_dir_path = result['error_dir_path']
             file_format = result['file_format']
             prefix = result['prefix']
             resource_id = result['resource_id']
             try:
-                print(file_path)
+                print(result)
 
                 # **2.1  Call procedure_staging load_command_file(file_name,table_name) lấy command để thực thi
                 # Gọi lại WF 4.2 hàm call_procedure_controller (DataflowController)
@@ -80,9 +80,9 @@ def load_file_to_staging():
                 # 5. Kết nối Staging để call_procedure 'update_isDelete_loadFile' để cập nhật isDelete = 1
                 # **6. Kiểm tra có update thành công hay không**
                 try:
+                    # 6.1 Gọi call procedure insert_log_staging('insert_log_staging', (config_id, 0, '', 'TRANSFORM_PENDING') để insert log
+                    # gọi lai hàm  4.1.hàm call_controller_procedure(DataflowController)
                     Staging().call_controller_procedure('insert_log_staging', (config_id, 0, '', 'TRANSFORM_PENDING'))
-
-                    # 6.1 Kết thúc tiến trình
                     print("Log status updated successfully.")
                 except AppException as update_error:
                     # **6.2 Raise error nếu cập nhật thất bại**

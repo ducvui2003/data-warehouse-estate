@@ -15,6 +15,7 @@ class STATUS(Enum):
     DATAMART_ERROR = "007"
     DATAMART_PENDING = "008"
 
+
 # Các level lỗi để lưu log
 STATUS_ERROR = [STATUS.FILE_ERROR, STATUS.STAGING_ERROR, STATUS.WAREHOUSE_ERROR, STATUS.DATAMART_ERROR]
 
@@ -54,7 +55,7 @@ class AppException(Exception):
         logging.error(f"Error log saved {self._file_name}", exc_info=True)
 
     def _handle_sent_email(self):
-        email_template = EmailTemplate(subject="Test",
+        email_template = EmailTemplate(subject="ERROR",
                                        status=self._status.name,
                                        code=self._status.value,
                                        message=self._message,
@@ -69,5 +70,3 @@ class AppException(Exception):
     @file_error.setter
     def file_error(self, file_name):
         self._file_name = file_name
-
-

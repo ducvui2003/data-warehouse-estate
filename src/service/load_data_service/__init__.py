@@ -62,6 +62,7 @@ def load_file_to_staging():
             # **6. Kiểm tra có update thành công hay không**
             try:
                 Staging().call_controller_procedure('update_isDelete_loadFile', (result['id'],))
+
                 # 6.1 Kết thúc tiến trình
                 print("Log status updated successfully.")
             except Exception as update_error:

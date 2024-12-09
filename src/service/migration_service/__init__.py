@@ -108,7 +108,7 @@ if __name__ == "__main__":
         print("Bắt đầu tải dữ liệu từ file staging...")
         loader.load_data()
 
-        print("Chuyển đổi và tải dữ liệu sang warehouse...")
+        print("Chuyển đổi và tải dữ liệu sang warehouse..")
         loader.transform_and_load_to_warehouse()
 
     except Exception as e:

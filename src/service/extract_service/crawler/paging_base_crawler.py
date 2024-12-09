@@ -6,7 +6,7 @@ from datetime import datetime
 
 from selenium.common import WebDriverException, NoSuchElementException
 
-from src.exception.AppException import AppException, LEVEL
+from src.exception.AppException import AppException, STATUS
 from src.service.extract_service.crawler.base_crawler import BaseCrawler
 from src.util.file_util import write_json_to_csv
 from src.util.validation_util import check_url_valid
@@ -124,7 +124,7 @@ class PagingBase(BaseCrawler):
         # 12.5 Kiểm tra list_url != None
         if len(estate_list) == 0:
             # 12.6 Ném ra ngoại lệ AppException => Crawl page không thành công
-            raise AppException(LEVEL.FILE_ERROR, "No data found")
+            raise AppException(STATUS.FILE_ERROR, "No data found")
 
         # 12.6 Tạo result = [] chứa các url đến trang chi tiết
         result = []

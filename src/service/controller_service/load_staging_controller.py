@@ -1,9 +1,9 @@
 import mysql.connector
 
-from src.config.database import staging_connector
-from src.config.procedure import get_script_load_file_by_source, insert_log_crawler, \
-    insert_log_staging, get_log_staging
+from src.config.procedure import get_script_load_file_by_source, insert_log_staging, get_log_staging
+from src.exception.AppException import STATUS, AppException
 from src.service.controller_service.database_controller import Controller
+from src.service.notification_service.email import EmailTemplate, LABEL
 
 
 class LoadStagingController(Controller):
@@ -26,18 +26,23 @@ class LoadStagingController(Controller):
         name = data['name']
         file_path = data['file_path']
         sql_list = self.call_controller_procedure(get_script_load_file_by_source, (name, file_path))
-        sql_list = str(sql_list['load_file_script']).split(';')
+        sql_statement = [obj['sql_statement'] for obj in sql_list]
         connection = self.get_staging_connection()
         cursor: mysql.connector.connection.MySQLCursor = connection.cursor()
 
         try:
-            for sql in sql_list:
+            for sql in sql_statement:
                 cursor.execute(sql)
             self.call_controller_procedure(insert_log_staging, (
                 config_id, 0, '', "TRANSFORM_PENDING"
             ))
-        except Exception as e:
+        except AppException as e:
             self.call_controller_procedure(insert_log_staging, (
-                config_id, 0, '', "TRANSFORM_ERROR"
+                config_id, 0, '', "STAGING_ERROR"
             ))
-
+            email_template = EmailTemplate(subject="ERROR",
+                                           status=STATUS.STAGING_ERROR.name,
+                                           code=STATUS.STAGING_ERROR.value,
+                                           message="Error while loading staging",
+                                           label=LABEL.ERROR)
+            email_template.sent_mail()

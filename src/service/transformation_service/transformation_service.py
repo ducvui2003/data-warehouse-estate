@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from src.config.procedure import transform_batdongsan_com_vn, transform_muaban_net, \
     load_staging_warehouse_batdongsan_com_vn, load_staging_warehouse_muaban_net
@@ -34,6 +35,8 @@ class Transformation:
                 result = self._controller.call_staging_procedure(transform_batdongsan_com_vn, ())
 
                 # 17.2.3 Lấy ra giá trị row_count từ procedure trên set lại vào row_count
+                if result is None:
+                    raise AppException(message='Error when transform data')
                 count_row = result['count_row']
 
             # 17.3 Kiểm tra source == 'muaban.net/bat-dong-san'
@@ -75,16 +78,18 @@ class Transformation:
             'file': None,
             'error_file_name': None,
             'count_row': count_row,
-            'status': 'STAGING_SUCCESS -> WAREHOUSE_PENDING'
+            'status': 'WAREHOUSE_PENDING'
         }
 
     # 19
     def handle_error(self, exception: AppException):
         # 19.1 Tạo file name error
-        filename = f"{self._prefix}{self._file_format}.log"
+        current_date = datetime.now().strftime(self._file_format)
+        # 10.2 tạo tên file
+        filename = f"{self._prefix}{current_date}.log"
         path = os.path.join(self._error_dir_path, filename)
         # 19.2 cài đặt file name error vào exception
-        exception.file_error = filename
+        exception.file_error = path
         exception._status = STATUS.STAGING_ERROR
         # 19.3 gọi hàm handler_exception trong exception (15)
         exception.handle_exception()

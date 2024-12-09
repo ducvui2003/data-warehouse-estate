@@ -1,3 +1,5 @@
+from datetime import timezone
+
 import mysql.connector
 from mysql.connector import Error, MySQLConnection
 from mysql.connector.pooling import MySQLConnectionPool
@@ -24,7 +26,8 @@ class MySQLCRUD:
                 user=user,
                 password=password,
                 database=database,
-                allow_local_infile=True
+                allow_local_infile=True,
+                time_zone="Asia/Ho_Chi_Minh"
             )
             print(f"Connection pool created with pool size: {pool_size}")
         except Error as e:
